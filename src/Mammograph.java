@@ -98,6 +98,21 @@ public class Mammograph {
         return sum / slopes.size();
     }
 
+    private int[] multiply(int[][] coeff, int[] s) {
+        int[] res = new int[s.length];
+        for (int i = 0; i < s.length; i++) {
+            for (int j = 0; j < s.length; j++) {
+                res[i] += coeff[i][j] * s[j];
+            }
+        }
+        return res;
+    }
+
+    private int[] extrapolate(int[] D, double slope, int range) {
+        
+        return null;
+    }
+
     public int[][] getImage() {
         return image;
     }
