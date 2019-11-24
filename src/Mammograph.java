@@ -109,8 +109,9 @@ public class Mammograph {
     }
 
     private int[] extrapolate(int[] D, double slope, int range) {
-        
-        return null;
+        double x = Math.sqrt(range * range / (slope * slope + 1)) + D[0];
+        double y = slope * (x - D[0]) + D[1];
+        return new int[]{(int)x, (int)y};
     }
 
     public int[][] getImage() {
