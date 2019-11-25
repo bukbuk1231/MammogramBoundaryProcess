@@ -3,7 +3,8 @@ import java.util.*;
 public class Mammograph {
 
     private int[][] image;
-    private final int THRESHOLD = 40, RANGE = 4;
+    private final int[] THRESHOLD = {40, 40};
+    private final int RANGE = 4;
     private final int[][] dirs = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
     private final int[][] coeff = {{-1, 3, -3, 1}, {3, -6, 3, 0}, {-3, 0, 3, 0}, {1, 4, 1, 0}};
 
@@ -16,9 +17,10 @@ public class Mammograph {
         List<int[]> boundaries = new ArrayList<>();
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                if (image[i][j] == THRESHOLD) {     // could tolerate some errors
+                if (image[i][j] >= THRESHOLD[0] && image[i][j] <= THRESHOLD[1]) {     // could tolerate some errors
                     List<int[]> bound = nonLinearExtrapolation(i, j);
-                    boundaries.add(bound.get(bound.size() - 1));
+                    if (bound.size() > 1)
+                        boundaries.add(bound.get(bound.size() - 1));
                 }
             }
         }
@@ -29,7 +31,9 @@ public class Mammograph {
         List<int[]> bound = new ArrayList<>();
         List<Double> slopes = new ArrayList<>();
         bound.add(new int[]{si, sj});
-        while (bound.size() < 4) {
+
+//        long start = System.nanoTime();
+        for (int i = 0; i < 4; i++) {
             int[] prev = bound.get(bound.size() - 1);
             List<int[]> cand = new ArrayList<>();
             Queue<int[]> queue = new LinkedList<>();
@@ -40,14 +44,16 @@ public class Mammograph {
             while (!queue.isEmpty()) {
                 int size = queue.size();
                 while (size-- > 0) {
+//                    if (System.nanoTime() - start >= 15e9)
+//                        return null;
                     int[] cur = queue.poll();
                     for (int[] dir : dirs) {
                         int x = cur[0] + dir[0], y = cur[1] + dir[1];
-                        if (x < 0 || x >= image.length || y < 0 || y >= image.length || !visited.add(x + "," + y))
-                            continue;
                         int[] nei = new int[]{x, y};
-                        queue.offer(nei);
                         int dist = dist(nei, prev);
+                        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || dist > RANGE || !visited.add(x + "," + y))
+                            continue;
+                        queue.offer(nei);
                         if (dist == RANGE && image[nei[0]][nei[1]] < image[prev[0]][prev[1]]) {
                             cand.add(new int[] {nei[0], nei[1], image[nei[0]][nei[1]]});
                         }
@@ -83,7 +89,7 @@ public class Mammograph {
 
             int x = (int)(xcoeff[0] * Math.pow(i - 1, 3) + xcoeff[1] * Math.pow(i, 2) + xcoeff[2] * i + xcoeff[3]);
             int y = (int)(ycoeff[0] * Math.pow(i - 1, 3) + ycoeff[1] * Math.pow(i, 2) + ycoeff[2] * i + ycoeff[3]);
-            image[x][y] = 255;
+            image[Math.abs(x % image.length)][Math.abs(y % image[0].length)] = 255;
         }
     }
 

@@ -8,5 +8,8 @@ public class Main {
         // GreyScaleUtil.print2DImageArray(image);
         // System.out.println(image.length + " , " + image[0].length);
         Mammograph mammo = new Mammograph(image);
+        mammo.findBoundary();
+        int[][] processed = mammo.getImage();
+        GreyScaleUtil.writeImage(GreyScaleUtil.generateImage(processed), "C:\\Users\\louda\\IdeaProjects\\Mammography\\assets\\mammogram-processed.jpg", "jpg");
     }
 }
